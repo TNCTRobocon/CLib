@@ -1,6 +1,34 @@
 #pragma once
 #ifndef __CMAP_HAEDER_GUARD__
 #define __CMAP_HAEDER_GUARD__
+#include <stdint.h>
+#include <stddef.h>
+
+typedef int (*comparator_t)(const void*,const void*);
+typedef int (*hasher_t)(const void*);
+typedef void (*deleter_t)(void**);
+
+//可変長配列
+struct varray{
+    size_t reserved,used;
+    deleter_t deleter;
+    void **memory;
+};
+
+typedef struct varray varray_t;
+typedef struct varray* varray_ptr;
+
+varray_ptr varray_new(size_t size,deleter_t deleter);
+void varray_delete(varray_ptr*);
+void varray_push(varray_ptr,void*);
+void varray_pop(varray_ptr);
+void* varray_top(varray_ptr);
+void* varray_index(varray_ptr,size_t);
+size_t varray_used();
+void** varray_begin(varray_ptr);
+void** varray_end(varray_ptr);
+
+//連想配列
 
 
 
