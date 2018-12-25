@@ -28,9 +28,25 @@ size_t varray_used();
 void** varray_begin(varray_ptr);
 void** varray_end(varray_ptr);
 
+//集合
+struct vset{
+    varray_t array;
+    comparator_t comparator;
+
+};
+
 //連想配列
-
-
+struct vpair{
+    void *first,*second;
+};
+typedef struct vpair vpair_t;
+struct vmap{
+    size_t reserved,used;
+comparator_t comparator;
+    deleter_t deleter;
+    vpair_t *array;
+    
+};
 
 
 
