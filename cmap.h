@@ -3,7 +3,7 @@
 #define __CMAP_HAEDER_GUARD__
 #include <stddef.h>
 #include <stdint.h>
-
+#include <stdbool.h>
 typedef int (*comparator_t)(const void*, const void*);
 typedef int (*hasher_t)(const void*);
 typedef void (*deleter_t)(void**);
@@ -46,7 +46,9 @@ void varray_for(varray_ptr,void(*process)(void*));
 void varray_sort(varray_ptr,comparator_t);
 void* varray_find(varray_ptr,const void*,comparator_t);//線形探索
 void* varray_find2(varray_ptr,const void*,comparator_t);//2分探索
+int varray_find2_idx(varray_ptr,const void*,comparator_t);//2分探索
 void varray_insert(varray_ptr, void*,comparator_t);//ソートされたものに要素を追加
+void varray_remove_idx(varray_ptr,int idx);
 vrange_ptr vrange_create_varray(const varray_ptr);
 
 //集合
@@ -60,6 +62,9 @@ typedef struct vset *vset_ptr;
 vset_ptr vset_new(size_t reserve,deleter_t,comparator_t);
 void vset_delete(vset_ptr* obj);
 void vset_insert(vset_ptr,void*);
+void vset_remove(vset_ptr,const void*);
+bool vset_exist(vset_ptr,const void*);
+void vset_for(vset_ptr,process_t);
 
 //連想配列
 struct vpair {

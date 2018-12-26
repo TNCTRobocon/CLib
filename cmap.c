@@ -164,26 +164,29 @@ void* varray_find(varray_ptr obj, const void* key, comparator_t comp) {
 }
 
 void* varray_find2(varray_ptr obj, const void* key, comparator_t comp) {
-    if (!obj || !comp) return NULL;
+    int idx = varray_find2_idx(obj, key, comp);
+    return idx >= 0 ? obj->memory[idx] : NULL;
+}
+int varray_find2_idx(varray_ptr obj, const void* key, comparator_t comp) {
+    if (!obj || !comp) return -1;
     void** list = obj->memory;
-    size_t begin = 0, end = obj->used, mid;
+    int begin = 0, end = obj->used, mid;
     while (begin < end) {
         mid = begin + ((end - begin) >> 1);
         int branch = comp(list[mid], key);
-
         if (!branch) {
-            return list[mid];
+            return mid;
         } else if (branch > 0) {
             end = mid;
         } else {
             begin = mid;
         }
     }
-    return NULL;
+    return -1;
 }
 
 void varray_insert(varray_ptr obj, void* item, comparator_t comp) {
-    if (!obj && !comp) return;
+    if (!obj || !comp) return;
     void** const begin = obj->memory;
     void** const end = obj->memory + obj->used;
     void **it, **jt;
@@ -198,6 +201,17 @@ void varray_insert(varray_ptr obj, void* item, comparator_t comp) {
     }
     *it = item;
     obj->used++;
+}
+
+void varray_remove_idx(varray_ptr obj, int idx) {
+    if (!obj || idx < 0 || idx >= obj->used) return;
+    void** mem = obj->memory;
+    size_t end = obj->used;
+    size_t it;
+    for (it = idx; it < end - 1; it++) {
+        mem[it] = mem[it + 1];
+    }
+    obj->used--;
 }
 
 vrange_ptr vrange_create_varray(const varray_ptr obj) {
@@ -233,7 +247,26 @@ void vset_delete(vset_ptr* ref) {
 }
 
 void vset_insert(vset_ptr obj, void* item) {
+    if (!obj) return;
     comparator_t comp = obj->comparator;
     varray_ptr array = obj->array;
     if (!varray_find2(array, item, comp)) varray_insert(array, item, comp);
+}
+
+bool vset_exist(vset_ptr obj, const void* cmp) {
+    if (!obj) return false;
+    comparator_t comp = obj->comparator;
+    varray_ptr array = obj->array;
+    return varray_find2(array, cmp, comp) != NULL;
+}
+
+void vset_remove(vset_ptr obj, const void* cmp) {
+    if (!obj) return;
+    int idx = varray_find2_idx(obj->array, cmp, obj->comparator);
+    varray_remove_idx(obj->array, idx);
+}
+
+void vset_for(vset_ptr obj, process_t process) {
+    if (!obj) return;
+    varray_for(obj->array, process);
 }
