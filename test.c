@@ -9,7 +9,7 @@ void shows(void** id) {
 }*/
 
 int main(int argc, char** argv) {
-    // allocation test
+    /*// allocation test
     printf("0:%ld\n", ceil2(0));
     printf("3:%ld\n", ceil2(3));
     printf("4:%ld\n", ceil2(4));
@@ -21,6 +21,15 @@ int main(int argc, char** argv) {
     varray_sort(array, (comparator_t)strcmp);
     varray_insert(array, "b", (comparator_t)strcmp);
     varray_for(array, (process_t)puts);
-    varray_delete(&array);
+    varray_delete(&array);*/
+    // set
+    vset_ptr set = vset_new(8, NULL, (comparator_t)strcmp);
+    vset_insert(set, "a");
+    vset_for(set, (process_t)puts);
+    vset_insert(set, "a");
+    vset_for(set, (process_t)puts);
+    vset_insert(set, "b");
+    vset_for(set, (process_t)puts);
+
     return 0;
 }
