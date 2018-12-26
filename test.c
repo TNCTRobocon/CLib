@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     varray_push(array, "d");
     varray_push(array, "c");
     varray_sort(array, (comparator_t)strcmp);
-    varray_insert(array, (comparator_t)strcmp, "b");
+    varray_insert(array, "b", (comparator_t)strcmp);
     varray_for(array, (process_t)puts);
     varray_delete(&array);
     return 0;

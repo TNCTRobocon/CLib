@@ -44,16 +44,22 @@ void** varray_end(varray_ptr);
 void** varray_next(void**);
 void varray_for(varray_ptr,void(*process)(void*));
 void varray_sort(varray_ptr,comparator_t);
-void* varray_find(varray_ptr,comparator_t,const void*);//線形探索
-void* varray_find2(varray_ptr,comparator_t,const void*);//2分探索
-void varray_insert(varray_ptr,comparator_t,void*);//ソートされたものに要素を追加
+void* varray_find(varray_ptr,const void*,comparator_t);//線形探索
+void* varray_find2(varray_ptr,const void*,comparator_t);//2分探索
+void varray_insert(varray_ptr, void*,comparator_t);//ソートされたものに要素を追加
 vrange_ptr vrange_create_varray(const varray_ptr);
 
 //集合
 struct vset {
-    varray_t array;
+    varray_ptr array;
     comparator_t comparator;
 };
+typedef struct vset vset_t;
+typedef struct vset *vset_ptr;
+
+vset_ptr vset_new(size_t reserve,deleter_t,comparator_t);
+void vset_delete(vset_ptr* obj);
+void vset_insert(vset_ptr,void*);
 
 //連想配列
 struct vpair {

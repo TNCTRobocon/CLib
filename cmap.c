@@ -16,7 +16,8 @@ static inline size_t max(size_t a, size_t b) {
 }
 
 void vrange_delete(vrange_ptr* range) {
-    free(range);
+    free(*range);
+    range = NULL;
 }
 
 void vrange_for(vrange_ptr range, process_t process) {
@@ -67,6 +68,7 @@ void varray_delete(varray_ptr* ref) {
     //本体の削除
     free(obj->memory);
     free(obj);
+    *ref = NULL;
 }
 
 void varray_reserve(varray_ptr obj, size_t size) {
@@ -148,7 +150,7 @@ void varray_sort(varray_ptr obj, comparator_t comp) {
     }
 }
 
-void* varray_find(varray_ptr obj, comparator_t comp, const void* key) {
+void* varray_find(varray_ptr obj, const void* key, comparator_t comp) {
     if (!obj || !comp) return NULL;
     void** const begin = obj->memory;
     void** const end = obj->memory + obj->used;
@@ -161,7 +163,7 @@ void* varray_find(varray_ptr obj, comparator_t comp, const void* key) {
     return NULL;
 }
 
-void* varray_find2(varray_ptr obj, comparator_t comp, const void* key) {
+void* varray_find2(varray_ptr obj, const void* key, comparator_t comp) {
     if (!obj || !comp) return NULL;
     void** list = obj->memory;
     size_t begin = 0, end = obj->used, mid;
@@ -180,7 +182,7 @@ void* varray_find2(varray_ptr obj, comparator_t comp, const void* key) {
     return NULL;
 }
 
-void varray_insert(varray_ptr obj, comparator_t comp, void* item) {
+void varray_insert(varray_ptr obj, void* item, comparator_t comp) {
     if (!obj && !comp) return;
     void** const begin = obj->memory;
     void** const end = obj->memory + obj->used;
@@ -207,4 +209,31 @@ vrange_ptr vrange_create_varray(const varray_ptr obj) {
     range->end = (iterator_generator_t)varray_end;
     range->next = (iterator_stepper_t)varray_next;
     return range;
+}
+
+vset_ptr vset_new(size_t reserve, deleter_t del, comparator_t comp) {
+    if (!comp) return NULL;
+    varray_ptr array = varray_new(reserve, del);
+    if (!array) return NULL;
+    vset_ptr set = (vset_ptr)malloc(sizeof(vset_t));
+    if (!set) {
+        varray_delete(&array);
+    }
+    set->array = array;
+    set->comparator = comp;
+    return set;
+}
+
+void vset_delete(vset_ptr* ref) {
+    if (!ref && !*ref) return;
+    vset_ptr obj = *ref;
+    varray_delete(&(obj->array));
+    free(obj);
+    *ref = NULL;
+}
+
+void vset_insert(vset_ptr obj, void* item) {
+    comparator_t comp = obj->comparator;
+    varray_ptr array = obj->array;
+    if (!varray_find2(array, item, comp)) varray_insert(array, item, comp);
 }
