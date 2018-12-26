@@ -33,6 +33,7 @@ typedef struct varray *varray_ptr;
 
 varray_ptr varray_new(size_t size, deleter_t deleter);
 void varray_delete(varray_ptr*);
+void varray_reserve(varray_ptr,size_t);
 void varray_push(varray_ptr, void*);
 void varray_pop(varray_ptr);
 void* varray_top(varray_ptr);
@@ -45,6 +46,7 @@ void varray_for(varray_ptr,void(*process)(void*));
 void varray_sort(varray_ptr,comparator_t);
 void* varray_find(varray_ptr,comparator_t,const void*);//線形探索
 void* varray_find2(varray_ptr,comparator_t,const void*);//2分探索
+void varray_insert(varray_ptr,comparator_t,void*);//ソートされたものに要素を追加
 vrange_ptr vrange_create_varray(const varray_ptr);
 
 //集合

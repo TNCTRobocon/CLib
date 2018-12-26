@@ -69,18 +69,20 @@ void varray_delete(varray_ptr* ref) {
     free(obj);
 }
 
-void varray_push(varray_ptr obj, void* newer) {
+void varray_reserve(varray_ptr obj, size_t size) {
     if (!obj) return;
-
-    //メモリ確保が必要か?
-    size_t next = obj->used + 1;
-    if (next >= obj->reserved) {
-        size_t reserve = ceil2(next);
+    //メモリの確保が必要か?
+    if (size > obj->reserved) {
+        size_t reserve = ceil2(size);
         obj->memory = realloc(obj->memory, reserve);
         obj->reserved = reserve;
     }
-    obj->memory[obj->used] = newer;
-    obj->used = next;
+}
+
+void varray_push(varray_ptr obj, void* newer) {
+    if (!obj) return;
+    varray_reserve(obj, obj->used + 1);
+    obj->memory[obj->used++] = newer;
 }
 
 void varray_pop(varray_ptr obj) {
@@ -176,6 +178,24 @@ void* varray_find2(varray_ptr obj, comparator_t comp, const void* key) {
         }
     }
     return NULL;
+}
+
+void varray_insert(varray_ptr obj, comparator_t comp, void* item) {
+    if (!obj && !comp) return;
+    void** const begin = obj->memory;
+    void** const end = obj->memory + obj->used;
+    void **it, **jt;
+    varray_reserve(obj, obj->used + 1);
+    //場所を確認(手抜き)
+    for (it = begin; it != end; it++) {
+        if (comp(*it, item) > 0) break;
+    }
+    //ずらす
+    for (jt = end; jt != it; jt--) {
+        *jt = *(jt - 1);
+    }
+    *it = item;
+    obj->used++;
 }
 
 vrange_ptr vrange_create_varray(const varray_ptr obj) {
