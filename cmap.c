@@ -60,7 +60,7 @@ void varray_push(varray_ptr obj, void* newer) {
         obj->memory = realloc(obj->memory, reserve);
         obj->reserved = reserve;
     }
-    obj->memory[next] = newer;
+    obj->memory[obj->used] = newer;
     obj->used = next;
 }
 
@@ -95,4 +95,13 @@ void** varray_end(varray_ptr obj) {
     return obj ? &obj->memory[obj->used] : NULL;
 }
 
-void varray_sort(varray_ptr obj, comparator_t comp) {}
+void varray_for_each(varray_ptr obj, void (*process)(void*)) {
+    if (obj) {
+        void** const begin = obj->memory;
+        void** const end = obj->memory + obj->used;
+        void** it;
+        for (it = begin; it != end; it++) {
+            process(*it);
+        }
+    }
+}
