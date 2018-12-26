@@ -307,7 +307,7 @@ bool vmap_exist(vmap_ptr obj, void* key) {
 
 void vmap_insert(vmap_ptr obj, void* key, void* value) {
     if (!obj) return;
-    if (!vmap_find(obj, key)) return;
+    if (!vmap_exist(obj, key)) return;
     vpair_ptr pair = (vpair_ptr)malloc(sizeof(vpair_t));
     if (!pair) return;
     pair->key = key;
