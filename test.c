@@ -3,7 +3,7 @@
 #include "cmap.h"
 
 void show(void* id) {
-    printf("%s", id);
+    printf("%s", (char*)id);
 }
 /*
 void shows(void** id) {
@@ -19,6 +19,10 @@ int main(int argc, char** argv) {
     varray_ptr array = varray_new(16, NULL);
     varray_push(array, "hello");
     varray_push(array, "world");
+    vrange_ptr range = vrange_create_varray(array);
+    vrange_for(range, show);
+
+    varray_pop(array);
     varray_for_each(array, show);
     varray_delete(&array);
     return 0;

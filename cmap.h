@@ -7,15 +7,19 @@
 typedef int (*comparator_t)(const void*, const void*);
 typedef int (*hasher_t)(const void*);
 typedef void (*deleter_t)(void**);
-
-//中小範囲
+typedef void (*process_t)(void*);
+typedef void** (*iterator_generator_t)(void*);
+typedef void** (*iterator_stepper_t)(void**);
+//抽象範囲型
 struct vrange{
-    void *object;
+    void* object;
     void** (*begin)(void* object);
     void** (*end)(void* object);
+    void** (*next)(void**);
 };
-
-
+typedef struct vrange *vrange_ptr;
+void vrange_delete(vrange_ptr*);
+void vrange_for(vrange_ptr,process_t);
 
 //可変長配列
 struct varray {
@@ -25,7 +29,7 @@ struct varray {
 };
 
 typedef struct varray varray_t;
-typedef struct varray* varray_ptr;
+typedef struct varray *varray_ptr;
 
 varray_ptr varray_new(size_t size, deleter_t deleter);
 void varray_delete(varray_ptr*);
@@ -38,7 +42,7 @@ void** varray_begin(varray_ptr);
 void** varray_end(varray_ptr);
 void** varray_next(void**);
 void varray_for_each(varray_ptr,void(*process)(void*));
-
+vrange_ptr vrange_create_varray(const varray_ptr);
 
 
 

@@ -8,6 +8,19 @@ static inline size_t max(size_t a, size_t b) {
     return a > b ? a : b;
 }
 
+void vrange_delete(vrange_ptr* range) {
+    free(range);
+}
+
+void vrange_for(vrange_ptr range, process_t process) {
+    void** const begin = range->begin(range->object);
+    void** const end = range->end(range->object);
+    void** it;
+    for (it = begin; it != end; it = range->next(it)) {
+        process(*it);
+    }
+}
+
 varray_ptr varray_new(size_t size, deleter_t deleter) {
     //先に確保するメモリを計算する
     size_t reserve = max(ceil2(size), mininum);
@@ -50,9 +63,8 @@ void varray_delete(varray_ptr* ref) {
 }
 
 void varray_push(varray_ptr obj, void* newer) {
-    if (!obj) {
-        return;
-    }
+    if (!obj) return;
+
     //メモリ確保が必要か?
     size_t next = obj->used + 1;
     if (next >= obj->reserved) {
@@ -95,13 +107,27 @@ void** varray_end(varray_ptr obj) {
     return obj ? &obj->memory[obj->used] : NULL;
 }
 
+void** varray_next(void** obj) {
+    return obj ? obj + 1 : NULL;
+}
+
 void varray_for_each(varray_ptr obj, void (*process)(void*)) {
-    if (obj) {
-        void** const begin = obj->memory;
-        void** const end = obj->memory + obj->used;
-        void** it;
-        for (it = begin; it != end; it++) {
-            process(*it);
-        }
+    if (!obj) return;
+    void** const begin = obj->memory;
+    void** const end = obj->memory + obj->used;
+    void** it;
+    for (it = begin; it != end; it++) {
+        process(*it);
     }
+}
+
+vrange_ptr vrange_create_varray(const varray_ptr obj) {
+    if (!obj) return NULL;
+    vrange_ptr range = malloc(sizeof(varray_t));
+    if (!range) return NULL;
+    range->object = obj;
+    range->begin = (iterator_generator_t)varray_begin;
+    range->end = (iterator_generator_t)varray_end;
+    range->next = (iterator_stepper_t)varray_next;
+    return range;
 }
