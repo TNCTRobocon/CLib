@@ -3,6 +3,13 @@
 #include <string.h>
 #include "allocation.h"
 
+#define SWAP(type, a, b) \
+    do {                 \
+        type _c;         \
+        _c = a;          \
+        a = b;           \
+        b = _c;          \
+    } while (0)
 static const size_t mininum = 8;
 static inline size_t max(size_t a, size_t b) {
     return a > b ? a : b;
@@ -111,13 +118,31 @@ void** varray_next(void** obj) {
     return obj ? obj + 1 : NULL;
 }
 
-void varray_for_each(varray_ptr obj, void (*process)(void*)) {
+void varray_for(varray_ptr obj, void (*process)(void*)) {
     if (!obj) return;
     void** const begin = obj->memory;
     void** const end = obj->memory + obj->used;
     void** it;
     for (it = begin; it != end; it++) {
         process(*it);
+    }
+}
+
+void varray_sort(varray_ptr obj, comparator_t comp) {
+    if (!obj || !comp) return;
+    //適当に選択ソート
+    void** const begin = obj->memory;
+    void** const end = obj->memory + obj->used;
+    void **it, **jt;
+    void** select;
+    for (it = begin; it != end; it++) {
+        select = it;
+        for (jt = it + 1; jt != end; jt++) {
+            if (comp(*select, *jt) > 0) {
+                select = jt;
+            }
+        }
+        SWAP(void*, *it, *select);
     }
 }
 

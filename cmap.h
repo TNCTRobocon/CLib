@@ -41,10 +41,9 @@ size_t varray_used();
 void** varray_begin(varray_ptr);
 void** varray_end(varray_ptr);
 void** varray_next(void**);
-void varray_for_each(varray_ptr,void(*process)(void*));
+void varray_for(varray_ptr,void(*process)(void*));
+void varray_sort(varray_ptr,comparator_t);
 vrange_ptr vrange_create_varray(const varray_ptr);
-
-
 
 //集合
 struct vset {
