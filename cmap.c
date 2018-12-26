@@ -81,6 +81,12 @@ void varray_reserve(varray_ptr obj, size_t size) {
     }
 }
 
+void varray_use(varray_ptr obj, size_t size) {
+    if (!obj) return;
+    varray_reserve(obj, size);
+    obj->used = size;
+}
+
 void varray_push(varray_ptr obj, void* newer) {
     if (!obj) return;
     varray_reserve(obj, obj->used + 1);
@@ -271,4 +277,46 @@ void vset_remove(vset_ptr obj, const void* cmp) {
 void vset_for(vset_ptr obj, process_t process) {
     if (!obj) return;
     varray_for(obj->array, process);
+}
+
+vmap_ptr vmap_new(size_t size,
+                  deleter_t key_del,
+                  comparator_t key_comp,
+                  deleter_t value_del) {
+    varray_ptr array = varray_new(size, NULL);
+    if (!array) return NULL;
+    vmap_ptr map = (vmap_ptr)malloc(sizeof(vmap_t));
+    if (!map) {
+        varray_delete(&array);
+        return NULL;
+    }
+    map->array = array;
+    map->key_deleter = key_del;
+    map->key_comparator = key_comp;
+    map->value_deleter = value_del;
+    return map;
+}
+
+void* vmap_find(vmap_ptr obj, void* key) {
+    return varray_find2(obj->array, key, obj->key_comparator);
+}
+
+bool vmap_exist(vmap_ptr obj, void* key) {
+    return varray_find2_idx(obj->array, key, obj->key_comparator) >= 0;
+}
+
+void vmap_insert(vmap_ptr obj, void* key, void* value) {
+    if (!obj) return;
+    if (!vmap_find(obj, key)) return;
+    vpair_ptr pair = (vpair_ptr)malloc(sizeof(vpair_t));
+    if (!pair) return;
+    pair->key = key;
+    pair->value = value;
+    varray_insert(obj->array, pair, obj->key_comparator);
+}
+
+void vmap_remove(vmap_ptr obj, void* key) {
+    if (!obj) return;
+    int idx = varray_find2_idx(obj->array, key, obj->key_comparator);
+    varray_remove_idx(obj->array, idx);
 }
