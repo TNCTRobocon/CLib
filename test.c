@@ -19,6 +19,8 @@ int main(int argc, char** argv) {
     varray_push(array, "d");
     varray_push(array, "c");
     varray_sort(array, (comparator_t)strcmp);
+
+    puts((char*)varray_find2(array, (comparator_t)strcmp, "c"));
     varray_for(array, (process_t)puts);
     varray_delete(&array);
     return 0;

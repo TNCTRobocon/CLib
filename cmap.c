@@ -130,7 +130,7 @@ void varray_for(varray_ptr obj, void (*process)(void*)) {
 
 void varray_sort(varray_ptr obj, comparator_t comp) {
     if (!obj || !comp) return;
-    //適当に選択ソート
+    //適当に選択ソート 必要があれば真面目に書く
     void** const begin = obj->memory;
     void** const end = obj->memory + obj->used;
     void **it, **jt;
@@ -144,6 +144,38 @@ void varray_sort(varray_ptr obj, comparator_t comp) {
         }
         SWAP(void*, *it, *select);
     }
+}
+
+void* varray_find(varray_ptr obj, comparator_t comp, const void* key) {
+    if (!obj || !comp) return NULL;
+    void** const begin = obj->memory;
+    void** const end = obj->memory + obj->used;
+    void** it;
+    for (it = begin; it != end; it++) {
+        if (!comp(*it, key)) {
+            return *it;
+        }
+    }
+    return NULL;
+}
+
+void* varray_find2(varray_ptr obj, comparator_t comp, const void* key) {
+    if (!obj || !comp) return NULL;
+    void** list = obj->memory;
+    size_t begin = 0, end = obj->used, mid;
+    while (begin < end) {
+        mid = begin + ((end - begin) >> 1);
+        int branch = comp(list[mid], key);
+
+        if (!branch) {
+            return list[mid];
+        } else if (branch > 0) {
+            end = mid;
+        } else {
+            begin = mid;
+        }
+    }
+    return NULL;
 }
 
 vrange_ptr vrange_create_varray(const varray_ptr obj) {

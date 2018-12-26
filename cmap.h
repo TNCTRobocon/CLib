@@ -43,6 +43,8 @@ void** varray_end(varray_ptr);
 void** varray_next(void**);
 void varray_for(varray_ptr,void(*process)(void*));
 void varray_sort(varray_ptr,comparator_t);
+void* varray_find(varray_ptr,comparator_t,const void*);//線形探索
+void* varray_find2(varray_ptr,comparator_t,const void*);//2分探索
 vrange_ptr vrange_create_varray(const varray_ptr);
 
 //集合
