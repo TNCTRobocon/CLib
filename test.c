@@ -25,11 +25,13 @@ int main(int argc, char** argv) {
     // set
     vset_ptr set = vset_new(8, NULL, (comparator_t)strcmp);
     vset_insert(set, "a");
-    vset_for(set, (process_t)puts);
     vset_insert(set, "a");
-    vset_for(set, (process_t)puts);
     vset_insert(set, "b");
     vset_for(set, (process_t)puts);
-
+    printf("%d\n", vset_exist(set, "a"));
+    puts("---");
+    vset_remove(set, "a");
+    printf("%d\n", vset_exist(set, "a"));
+    vset_for(set, (process_t)puts);
     return 0;
 }

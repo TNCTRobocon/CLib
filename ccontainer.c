@@ -183,7 +183,7 @@ int varray_find2_idx(varray_ptr obj, const void* key, comparator_t comp) {
         if (!branch) {
             return mid;
         } else if (branch > 0) {
-            end = mid - 1;
+            end = mid;
         } else {
             begin = mid + 1;
         }
@@ -256,7 +256,7 @@ void vset_insert(vset_ptr obj, void* item) {
     if (!obj) return;
     comparator_t comp = obj->comparator;
     varray_ptr array = obj->array;
-    if (varray_find2(array, item, comp) == NULL) {
+    if (!vset_exist(obj, item)) {
         varray_insert(array, item, comp);
     }
 }
@@ -265,7 +265,7 @@ bool vset_exist(vset_ptr obj, const void* cmp) {
     if (!obj) return false;
     comparator_t comp = obj->comparator;
     varray_ptr array = obj->array;
-    return varray_find2(array, cmp, comp) != NULL;
+    return varray_find2_idx(array, cmp, comp) >= 0;
 }
 
 void vset_remove(vset_ptr obj, const void* cmp) {
