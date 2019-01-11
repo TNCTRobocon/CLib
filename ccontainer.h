@@ -8,7 +8,7 @@ typedef int (*comparator_t)(const void*, const void*);
 typedef int (*hasher_t)(const void*);
 typedef void (*deleter_t)(void**);
 typedef void (*process_t)(void*);
-typedef void (*process2_t)(void*, void*);
+typedef void (*process_pair_t)(void*, void*);
 typedef void** (*iterator_generator_t)(void*);
 typedef void** (*iterator_stepper_t)(void**);
 //抽象範囲型
@@ -40,7 +40,7 @@ void varray_push(varray_ptr, void*);
 void varray_pop(varray_ptr);
 void* varray_top(varray_ptr);
 void* varray_index(varray_ptr, size_t);
-size_t varray_used();
+size_t varray_used(const varray_ptr);
 void** varray_begin(varray_ptr);
 void** varray_end(varray_ptr);
 void** varray_next(void**);
@@ -80,21 +80,24 @@ typedef struct vpair *vpair_ptr;
 
 struct vmap {
     varray_ptr array;
-    deleter_t key_deleter;
     comparator_t key_comparator;
+    deleter_t key_deleter;
     deleter_t value_deleter;
 };
 typedef struct vmap vmap_t;
 typedef struct vmap* vmap_ptr;
 vmap_ptr vmap_new(size_t size,
-                  deleter_t key_del,
                   comparator_t key_comp,
+                  deleter_t key_del,
                   deleter_t value_del);
 void vmap_delete(vmap_ptr* obj);
 void* vmap_find(vmap_ptr, void* key);
 bool vmap_exist(vmap_ptr obj, void* key);
 void vmap_insert(vmap_ptr, void* key, void* value);
 void vmap_remove(vmap_ptr, void* key);
-void vmap_for(vmap_ptr, process2_t);
+void vmap_for_pair(vmap_ptr, process_pair_t);
+
+size_t vmap_used(const vmap_ptr);
+
 
 #endif
