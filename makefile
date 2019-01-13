@@ -3,8 +3,8 @@ CC := gcc
 TARGET := cmap.out
 CFLAGS := -std=c99 -g -Wall -O0
 FORMAT := clang-format
-SRC:= test.c ccontainer.c
-OBJ:= test.o ccontainer.o
+SRC:= test.c ccontainer.c cpacket.c
+OBJ:= test.o ccontainer.o cpacket.o
 
 .PHONY:all run debug clear format
 all:$(TARGET)
@@ -13,6 +13,8 @@ $(TARGET):clear format $(OBJ)
 test.o:test.c 
 	$(CC) $(CFLAGS) -c $<
 ccontainer.o:ccontainer.c
+	$(CC) $(CFLAGS) -c $<
+cpacket.o:cpacket.c
 	$(CC) $(CFLAGS) -c $<
 run:all
 	./$(TARGET)

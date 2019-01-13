@@ -449,3 +449,37 @@ void vmap_for_key(vmap_ptr map, process_t process) {
         process(it->key);
     }
 }
+
+bling_ptr bling_new(size_t size) {
+    uint8_t* bytes = (uint8_t*)malloc(size * sizeof(uint8_t));
+    if (!bytes) return NULL;
+    bling_ptr ling = (bling_ptr)malloc(sizeof(bling_t));
+    if (!ling) {
+        free(bytes);
+        return NULL;
+    }
+    ling->bytes = bytes;
+    ling->full = size;
+    ling->used = 0;
+    ling->head = 0;
+    ling->tail = 0;
+    return ling;
+}
+
+void bling_init(bling_ptr ling, uint8_t* bytes, size_t size) {
+    ling->bytes = bytes;
+    ling->full = size;
+    ling->used = 0;
+    ling->head = 0;
+    ling->tail = 0;
+}
+
+void bling_delete(bling_ptr* ling) {
+    if (!ling || !*ling) return;
+    if ((*ling)->bytes) {
+        free((*ling)->bytes);
+        (*ling)->bytes = NULL;
+    }
+    free(*ling);
+    *ling = NULL;
+}

@@ -105,12 +105,16 @@ void vmap_for(vmap_ptr,process_pair_t);
 void vmap_for_value(vmap_ptr,process_t);
 void vmap_for_key(vmap_ptr,process_t);
 
-//n-木構造
-struct vtree{
-    struct vtree* base;
-    struct vtree* children;
-    void* object;
+//循環FIFO(byte専用)
+struct bling{
+    uint8_t *bytes;
+    size_t full,used;
+    size_t head,tail;
 };
+typedef struct bling bling_t;
+typedef struct bling* bling_ptr;
 
-
+bling_ptr bling_new(size_t);//動的割り当てよう
+void bling_init(bling_ptr,uint8_t* bytes,size_t);//静的割り当て用
+void bling_delete(bling_ptr*);//動的開放用
 #endif
