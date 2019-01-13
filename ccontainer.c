@@ -539,3 +539,10 @@ size_t bling_read(bling_ptr obj, char* bytes, size_t size) {
     obj->tail = pos;
     return read;
 }
+
+void bling_clear(bling_ptr ling){
+    if (!ling)return;
+    ling->used = 0;
+    ling->head = 0;
+    ling->tail = 0;
+}
