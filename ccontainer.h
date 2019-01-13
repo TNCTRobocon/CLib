@@ -100,7 +100,15 @@ void* vmap_get(const vmap_ptr,void* key);
 bool vmap_exist(const vmap_ptr,void* key);
 void vmap_insert(vmap_ptr,void* key,void*value);
 void vmap_set(const vmap_ptr,void* key,void* value);//要素が存在すれば上書きするよ
+void vmap_remove(vmap_ptr,  void* key);
 void vmap_for(vmap_ptr,process_pair_t);
+
+//n-木構造
+struct vtree{
+    struct vtree* base;
+    struct vtree* children;
+    void* object;
+};
 
 
 #endif

@@ -370,7 +370,7 @@ bool vmap_exist(const vmap_ptr map, void* key) {
     return vmap_find_idx(map, key) >= 0;
 }
 
-static void vmap_pair_new(vmap_ptr map, void* key, void + value) {
+static void vmap_pair_new(vmap_ptr map, void* key, void* value) {
     //生成する
     vpair_ptr const begin = map->pairs;
     vpair_ptr const end = map->pairs + map->used;
@@ -392,18 +392,33 @@ static void vmap_pair_new(vmap_ptr map, void* key, void + value) {
 
 void vmap_insert(vmap_ptr map, void* key, void* value) {
     if (!map || vmap_exist(map, key)) return;
-    vmap_pair_new(map,key,value);
+    vmap_pair_new(map, key, value);
 }
 
 void vmap_set(const vmap_ptr map, void* key, void* value) {
     if (!map) return;
-    int idx = vmap_find_idx(map,key)
-    if (idx<0){
-        vmap_pair_key(map,key,value);
-    }else{
-        vmap->pairs[idx]=value;
+    int idx = vmap_find_idx(map, key);
+    if (idx < 0) {
+        vmap_pair_new(map, key, value);
+    } else {
+        map->pairs[idx].value = value;
     }
+}
 
+void vmap_remove(vmap_ptr map, void* key) {
+    if (!map) return;
+    int idx = vmap_find_idx(map, key), jdx;
+    if (idx < 0) return;
+    //開放処理
+    vpair_ptr pairs = map->pairs;
+    vpair_ptr it = &pairs[idx];
+    map->key_deleter(&it->key);
+    map->value_deleter(&it->value);
+    //後ろから詰める
+    for (jdx = map->used - 1; jdx > idx; jdx--) {
+        pairs[jdx - 1] = pairs[jdx];
+    }
+    map->used--;
 }
 
 void vmap_for(vmap_ptr map, process_pair_t process) {
