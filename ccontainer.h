@@ -96,9 +96,10 @@ void vmap_delete(vmap_ptr*);
 size_t vmap_used(const vmap_ptr);
 void vmap_reserve(vmap_ptr,size_t);
 int vmap_find_idx(const vmap_ptr,void* key);
-void* vmap_find(const vmap_ptr,void* key);
+void* vmap_get(const vmap_ptr,void* key);
 bool vmap_exist(const vmap_ptr,void* key);
 void vmap_insert(vmap_ptr,void* key,void*value);
+void vmap_set(const vmap_ptr,void* key,void* value);//要素が存在すれば上書きするよ
 void vmap_for(vmap_ptr,process_pair_t);
 
 

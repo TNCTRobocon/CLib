@@ -361,7 +361,7 @@ int vmap_find_idx(const vmap_ptr map, void* key) {
     return -1;
 }
 
-void* vmap_find(const vmap_ptr map, void* key) {
+void* vmap_get(const vmap_ptr map, void* key) {
     int idx = vmap_find_idx(map, key);
     return idx >= 0 ? &map->pairs[idx] : NULL;
 }
@@ -370,8 +370,7 @@ bool vmap_exist(const vmap_ptr map, void* key) {
     return vmap_find_idx(map, key) >= 0;
 }
 
-void vmap_insert(vmap_ptr map, void* key, void* value) {
-    if (!map || vmap_exist(map, key)) return;
+static void vmap_pair_new(vmap_ptr map, void* key, void + value) {
     //生成する
     vpair_ptr const begin = map->pairs;
     vpair_ptr const end = map->pairs + map->used;
@@ -389,6 +388,22 @@ void vmap_insert(vmap_ptr map, void* key, void* value) {
     it->key = key;
     it->value = value;
     map->used++;
+}
+
+void vmap_insert(vmap_ptr map, void* key, void* value) {
+    if (!map || vmap_exist(map, key)) return;
+    vmap_pair_new(map,key,value);
+}
+
+void vmap_set(const vmap_ptr map, void* key, void* value) {
+    if (!map) return;
+    int idx = vmap_find_idx(map,key)
+    if (idx<0){
+        vmap_pair_key(map,key,value);
+    }else{
+        vmap->pairs[idx]=value;
+    }
+
 }
 
 void vmap_for(vmap_ptr map, process_pair_t process) {
