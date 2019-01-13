@@ -117,4 +117,14 @@ typedef struct bling* bling_ptr;
 bling_ptr bling_new(size_t);//動的割り当てよう
 void bling_init(bling_ptr,uint8_t* bytes,size_t);//静的割り当て用
 void bling_delete(bling_ptr*);//動的開放用
+size_t bling_used(const bling_ptr);
+size_t bling_free(const bling_ptr);
+size_t bling_full(const bling_ptr);
+bool bling_is_full(const bling_ptr);
+bool bling_is_empty(const bling_ptr);
+
+size_t bling_write(bling_ptr,const char* bytes, size_t size);
+size_t bling_read(bling_ptr,char* bytes,size_t size);
+void bling_clear(bling_ptr);
+
 #endif

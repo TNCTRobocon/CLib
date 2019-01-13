@@ -15,6 +15,10 @@ static inline size_t max(size_t a, size_t b) {
     return a > b ? a : b;
 }
 
+static inline size_t min(size_t a, size_t b) {
+    return a < b ? a : b;
+}
+
 void vrange_delete(vrange_ptr* range) {
     free(*range);
     range = NULL;
@@ -450,6 +454,12 @@ void vmap_for_key(vmap_ptr map, process_t process) {
     }
 }
 
+static inline size_t bling_next(bling_ptr obj, size_t now) {
+    if (!obj) return 0;
+    size_t next = now + 1;
+    return next != obj->full ? next : 0;
+}
+
 bling_ptr bling_new(size_t size) {
     uint8_t* bytes = (uint8_t*)malloc(size * sizeof(uint8_t));
     if (!bytes) return NULL;
@@ -482,4 +492,50 @@ void bling_delete(bling_ptr* ling) {
     }
     free(*ling);
     *ling = NULL;
+}
+
+size_t bling_used(const bling_ptr ptr) {
+    return ptr ? ptr->used : 0;
+}
+
+size_t bling_free(const bling_ptr ptr) {
+    return ptr ? (ptr->full) - (ptr->used) : 0;
+}
+
+size_t bling_full(const bling_ptr ptr) {
+    return ptr ? ptr->full : 0;
+}
+
+bool bling_is_full(const bling_ptr ptr) {
+    return ptr ? (ptr->full - 1 == ptr->used) : false;
+}
+
+bool bling_is_empty(const bling_ptr ptr) {
+    return ptr ? !ptr->used : false;
+}
+
+size_t bling_write(bling_ptr obj, const char* bytes, size_t size) {
+    if (!obj || !bytes || !size) return 0;
+    size_t write = min(bling_free(obj), size);  //書き込み可能領域を計算する
+    size_t cnt, pos;
+    pos = obj->head;
+    for (cnt = 0; cnt < write; cnt++) {
+        obj->bytes[pos] = *(bytes++);
+        pos = bling_next(obj, pos);
+    }
+    obj->head = pos;
+    return write;
+}
+
+size_t bling_read(bling_ptr obj, char* bytes, size_t size) {
+    if (!obj || !bytes || !size) return 0;
+    size_t read = min(bling_used(obj), size);  //読み込み可能領域を計算する
+    size_t cnt, pos;
+    pos = obj->tail;
+    for (cnt = 0; cnt < read; cnt++) {
+        *(bytes++) = obj->bytes[pos];
+        pos = bling_next(obj, pos);
+    }
+    obj->tail = pos;
+    return read;
 }
