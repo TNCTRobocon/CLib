@@ -430,3 +430,22 @@ void vmap_for(vmap_ptr map, process_pair_t process) {
         process(it->key, it->value);
     }
 }
+
+void vmap_for_value(vmap_ptr map, process_t process) {
+    if (!map || !map->pairs || !process) return;
+    vpair_ptr const begin = map->pairs;
+    vpair_ptr const end = map->pairs + map->used;
+    vpair_ptr it;
+    for (it = begin; it != end; it++) {
+        process(it->value);
+    }
+}
+void vmap_for_key(vmap_ptr map, process_t process) {
+    if (!map || !map->pairs || !process) return;
+    vpair_ptr const begin = map->pairs;
+    vpair_ptr const end = map->pairs + map->used;
+    vpair_ptr it;
+    for (it = begin; it != end; it++) {
+        process(it->key);
+    }
+}

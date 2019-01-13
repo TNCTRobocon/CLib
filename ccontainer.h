@@ -102,6 +102,8 @@ void vmap_insert(vmap_ptr,void* key,void*value);
 void vmap_set(const vmap_ptr,void* key,void* value);//要素が存在すれば上書きするよ
 void vmap_remove(vmap_ptr,  void* key);
 void vmap_for(vmap_ptr,process_pair_t);
+void vmap_for_value(vmap_ptr,process_t);
+void vmap_for_key(vmap_ptr,process_t);
 
 //n-木構造
 struct vtree{
