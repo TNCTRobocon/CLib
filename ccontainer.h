@@ -71,33 +71,35 @@ bool vset_exist(vset_ptr, const void*);
 void vset_for(vset_ptr, process_t);
 
 //連想配列
-struct vpair{
-    void * key;
-    void * value;
+struct vpair {
+    void* key;
+    void* value;
 };
 typedef struct vpair vpair_t;
-typedef struct vpair *vpair_ptr;
+typedef struct vpair* vpair_ptr;
 
 struct vmap {
-    varray_ptr array;
+    size_t reserved, used;
+    vpair_ptr pairs;
     comparator_t key_comparator;
     deleter_t key_deleter;
     deleter_t value_deleter;
 };
 typedef struct vmap vmap_t;
 typedef struct vmap* vmap_ptr;
+
 vmap_ptr vmap_new(size_t size,
                   comparator_t key_comp,
                   deleter_t key_del,
                   deleter_t value_del);
-void vmap_delete(vmap_ptr* obj);
-void* vmap_find(vmap_ptr, void* key);
-bool vmap_exist(vmap_ptr obj, void* key);
-void vmap_insert(vmap_ptr, void* key, void* value);
-void vmap_remove(vmap_ptr, void* key);
-void vmap_for_pair(vmap_ptr, process_pair_t);
-
+void vmap_delete(vmap_ptr*);
 size_t vmap_used(const vmap_ptr);
+void vmap_reserve(vmap_ptr,size_t);
+int vmap_find_idx(const vmap_ptr,void* key);
+void* vmap_find(const vmap_ptr,void* key);
+bool vmap_exist(const vmap_ptr,void* key);
+void vmap_insert(vmap_ptr,void* key,void*value);
+void vmap_for(vmap_ptr,process_pair_t);
 
 
 #endif

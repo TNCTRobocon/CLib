@@ -40,12 +40,15 @@ int main(int argc, char** argv) {
     vset_for(set, (process_t)puts);
     */
     vmap_ptr map = vmap_new(16, (comparator_t)strcmp, NULL, NULL);
-    printf("%d\n", vmap_used(map));
-    vmap_insert(map, "a", "1");
-    vmap_insert(map, "b", "2");
-    vmap_insert(map, "c", "3");
-    printf("%d\n", vmap_used(map));
-    vmap_for_pair(map, (process_pair_t)print_pair);
 
+    printf("%ld\n", vmap_used(map));
+    static char *aa = "a", *bb = "b", *cc = "c";
+    vmap_insert(map, aa, "1");
+    vmap_insert(map, bb, "2");
+    vmap_insert(map, cc, "3");
+    printf("%ld\n", vmap_used(map));
+    vmap_for(map, (process_pair_t)print_pair);
+
+    vmap_delete(&map);
     return 0;
 }

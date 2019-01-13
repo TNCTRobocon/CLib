@@ -289,49 +289,114 @@ vmap_ptr vmap_new(size_t size,
                   comparator_t key_comp,
                   deleter_t key_del,
                   deleter_t value_del) {
-    varray_ptr array = varray_new(size, NULL);
-    if (!array) return NULL;
+    const size_t reserve = ceil2(size);
+    if (!key_comp) return NULL;
+    vpair_ptr pairs = (vpair_ptr)malloc(reserve * sizeof(vpair_t));
+    if (!pairs) return NULL;
     vmap_ptr map = (vmap_ptr)malloc(sizeof(vmap_t));
     if (!map) {
-        varray_delete(&array);
+        free(pairs);
         return NULL;
     }
-    map->array = array;
-    map->key_deleter = key_del;
+    map->reserved = reserve;
+    map->used = 0;
+    map->pairs = pairs;
     map->key_comparator = key_comp;
+    map->key_deleter = key_del;
     map->value_deleter = value_del;
     return map;
 }
 
-void* vmap_find(vmap_ptr obj, void* key) {
-    return varray_find2(obj->array, key, obj->key_comparator);
+void vmap_delete(vmap_ptr* map) {
+    if (!map || !*map) return;
+    if ((*map)->pairs) {
+        deleter_t key_del = (*map)->key_deleter,
+                  val_del = (*map)->value_deleter;
+        vpair_ptr pairs = (*map)->pairs;
+        vpair_ptr const begin = pairs, end = pairs + (*map)->used;
+        vpair_ptr it;
+        for (it = begin; it != end; it++) {
+            void *key = it->key, *value = it->value;
+            if (key_del && key) {
+                key_del(&key);
+            }
+            if (val_del && value) {
+                val_del(&value);
+            }
+        }
+        free(pairs);
+        (*map)->pairs = NULL;
+    }
+    free(*map);
+    *map = NULL;
 }
 
-bool vmap_exist(vmap_ptr obj, void* key) {
-    return varray_find2_idx(obj->array, key, obj->key_comparator) >= 0;
+size_t vmap_used(const vmap_ptr map) {
+    return map ? map->used : 0;
 }
 
-void vmap_insert(vmap_ptr obj, void* key, void* value) {
-    if (!obj) return;
-    if (!vmap_exist(obj, key)) return;
-    vpair_ptr pair = (vpair_ptr)malloc(sizeof(vpair_t));
-    if (!pair) return;
-    pair->key = key;
-    pair->value = value;
-    varray_insert(obj->array, pair, obj->key_comparator);
+void vmap_reserve(vmap_ptr map, size_t reserve) {
+    if (!map) return;
+    if (reserve > map->reserved) {
+        reserve = ceil2(reserve);  // fit
+        map->pairs = (vpair_ptr)realloc(map->pairs, reserve);
+    }
 }
 
-void vmap_remove(vmap_ptr obj, void* key) {
-    if (!obj) return;
-    int idx = varray_find2_idx(obj->array, key, obj->key_comparator);
-    varray_remove_idx(obj->array, idx);
+int vmap_find_idx(const vmap_ptr map, void* key) {
+    if (!map || !map->key_comparator) return -1;
+    vpair_ptr pairs = map->pairs;
+    int begin = 0, end = map->used, mid;
+    while (begin < end) {
+        mid = begin + ((end - begin) >> 1);
+        int branch = map->key_comparator(pairs[mid].key, key);
+        if (!branch) {
+            return mid;
+        } else if (branch > 0) {
+            end = mid;
+        } else {
+            begin = mid + 1;
+        }
+    }
+    return -1;
 }
 
-void vmap_for_pair(vmap_ptr map, process_pair_t process) {
-    if (!map || !process) return;
-    varray_for(map->array, (process_t)process);
+void* vmap_find(const vmap_ptr map, void* key) {
+    int idx = vmap_find_idx(map, key);
+    return idx >= 0 ? &map->pairs[idx] : NULL;
 }
 
-size_t vmap_used(const vmap_ptr obj) {
-    return obj ? obj->array ? obj->array->used : 0 : 0;
+bool vmap_exist(const vmap_ptr map, void* key) {
+    return vmap_find_idx(map, key) >= 0;
+}
+
+void vmap_insert(vmap_ptr map, void* key, void* value) {
+    if (!map || vmap_exist(map, key)) return;
+    //生成する
+    vpair_ptr const begin = map->pairs;
+    vpair_ptr const end = map->pairs + map->used;
+    vpair_ptr it, jt;
+    vmap_reserve(map, map->used + 1);
+    //場所を確認(手抜き)
+    for (it = begin; it != end; it++) {
+        if (map->key_comparator(it->key, key) > 0) break;
+    }
+    //ずらす
+    for (jt = end; jt != it; jt--) {
+        *jt = *(jt - 1);
+    }
+    //代入
+    it->key = key;
+    it->value = value;
+    map->used++;
+}
+
+void vmap_for(vmap_ptr map, process_pair_t process) {
+    if (!map || !map->pairs || !process) return;
+    vpair_ptr const begin = map->pairs;
+    vpair_ptr const end = map->pairs + map->used;
+    vpair_ptr it;
+    for (it = begin; it != end; it++) {
+        process(it->key, it->value);
+    }
 }
