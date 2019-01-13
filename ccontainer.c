@@ -524,6 +524,7 @@ size_t bling_write(bling_ptr obj, const char* bytes, size_t size) {
         pos = bling_next(obj, pos);
     }
     obj->head = pos;
+    obj->used+=write-1;
     return write;
 }
 
@@ -537,6 +538,7 @@ size_t bling_read(bling_ptr obj, char* bytes, size_t size) {
         pos = bling_next(obj, pos);
     }
     obj->tail = pos;
+    obj->used-=read-1;
     return read;
 }
 
@@ -545,4 +547,12 @@ void bling_clear(bling_ptr ling){
     ling->used = 0;
     ling->head = 0;
     ling->tail = 0;
+}
+
+void bling_for(bling_ptr ling,process_byte_t process){
+    if (!ling||!process)return;
+    size_t pos;
+    for (pos=ling->head;pos!=ling->tail;pos=bling_next(pos)){
+        process(ling->bytes[pos]);
+    }
 }

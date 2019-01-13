@@ -9,8 +9,10 @@ typedef int (*hasher_t)(const void*);
 typedef void (*deleter_t)(void**);
 typedef void (*process_t)(void*);
 typedef void (*process_pair_t)(void*, void*);
+typedef void (*process_byte_t)(char);
 typedef void** (*iterator_generator_t)(void*);
 typedef void** (*iterator_stepper_t)(void**);
+
 //抽象範囲型
 struct vrange {
     void* object;
@@ -126,5 +128,7 @@ bool bling_is_empty(const bling_ptr);
 size_t bling_write(bling_ptr,const char* bytes, size_t size);
 size_t bling_read(bling_ptr,char* bytes,size_t size);
 void bling_clear(bling_ptr);
+void bling_for(bling_ptr,process_byte_t);
+
 
 #endif
