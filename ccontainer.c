@@ -461,6 +461,7 @@ static inline size_t bling_next(bling_ptr obj, size_t now) {
 }
 
 bling_ptr bling_new(size_t size) {
+    size = ceil2(size);
     uint8_t* bytes = (uint8_t*)malloc(size * sizeof(uint8_t));
     if (!bytes) return NULL;
     bling_ptr ling = (bling_ptr)malloc(sizeof(bling_t));
@@ -514,7 +515,7 @@ bool bling_is_empty(const bling_ptr ptr) {
     return ptr ? !ptr->used : false;
 }
 
-size_t bling_write(bling_ptr obj, const char* bytes, size_t size) {
+size_t bling_write(bling_ptr obj, const uint8_t* bytes, size_t size) {
     if (!obj || !bytes || !size) return 0;
     size_t write = min(bling_free(obj), size);  //書き込み可能領域を計算する
     size_t cnt, pos;
@@ -524,11 +525,11 @@ size_t bling_write(bling_ptr obj, const char* bytes, size_t size) {
         pos = bling_next(obj, pos);
     }
     obj->head = pos;
-    obj->used+=write-1;
+    obj->used += write - 1;
     return write;
 }
 
-size_t bling_read(bling_ptr obj, char* bytes, size_t size) {
+size_t bling_read(bling_ptr obj, uint8_t* bytes, size_t size) {
     if (!obj || !bytes || !size) return 0;
     size_t read = min(bling_used(obj), size);  //読み込み可能領域を計算する
     size_t cnt, pos;
@@ -538,21 +539,41 @@ size_t bling_read(bling_ptr obj, char* bytes, size_t size) {
         pos = bling_next(obj, pos);
     }
     obj->tail = pos;
-    obj->used-=read-1;
+    obj->used -= read - 1;
     return read;
 }
 
-void bling_clear(bling_ptr ling){
-    if (!ling)return;
+void bling_clear(bling_ptr ling) {
+    if (!ling) return;
     ling->used = 0;
     ling->head = 0;
     ling->tail = 0;
 }
 
-void bling_for(bling_ptr ling,process_byte_t process){
-    if (!ling||!process)return;
+void bling_for(bling_ptr ling, process_byte_t process) {
+    if (!ling || !process) return;
     size_t pos;
-    for (pos=ling->head;pos!=ling->tail;pos=bling_next(pos)){
+    for (pos = ling->head; pos != ling->tail; pos = bling_next(ling, pos)) {
         process(ling->bytes[pos]);
     }
+}
+
+void bling_reserve(bling_ptr ling, size_t size) {
+    if (!ling || (ling->full) >= size) return;
+    //移動
+    size = ceil2(size);
+    uint8_t* nuevo = (uint8_t*)malloc(size * sizeof(char));
+    size_t index, pos;
+
+    for (index = 0, pos = 0; index < (ling->used);
+         index++, pos = bling_next(ling, pos)) {
+        nuevo[index] = ling->bytes[pos];
+    }
+    free(ling->bytes);
+    //再設定
+    ling->bytes = nuevo;
+    ling->full = size;
+    ling->used = index;
+    ling->head = 0;
+    ling->tail = index;
 }
