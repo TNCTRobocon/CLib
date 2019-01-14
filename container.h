@@ -129,7 +129,6 @@ size_t bling_write(bling_ptr,const uint8_t* bytes, size_t size);
 size_t bling_read(bling_ptr,uint8_t* bytes,size_t size);
 void bling_clear(bling_ptr);
 void bling_for(bling_ptr,process_byte_t);
-
 void bling_reserve(bling_ptr,size_t);//制約 動的割当の場合のみ、利用可能
 
 #endif
