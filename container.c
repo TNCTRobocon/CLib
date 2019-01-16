@@ -485,6 +485,7 @@ void sbring_init(sbring_ptr ring, uint8_t* bytes, size_t size) {
     ring->tail = 0;
 }
 
+void sbring_deinit(sbring_ptr ring) {}
 
 size_t sbring_used(const sbring_ptr ptr) {
     return ptr ? ptr->used : 0;
@@ -556,11 +557,29 @@ uint8_t ssbring_index(sbring_ptr ring, size_t idx) {
     return &ring->bytes[pos];
 }
 
-hset_ptr hset_new(size_t reserve,
-                  hash_t hash,
-                  comparator_t comp,
-                  deleter_t del) {
-    if (!hash && !comp) return NULL;
-    hnode_ptr nodes = (hnode_ptr)malloc(reserve * sizeof(hnode_t));
-    if (!nodes) return NULL;
+void shset_init(shset_ptr set,
+                hnode_ptr nodes,
+                size_t reserved,
+                hash_t hash,
+                comparator_t comp,
+                deinit_t del) {
+    if (!set || !nodes) return;
+    set->nodes = nodes;
+    set->reserve = reserved;
+    set->used = 0;
+    set->hash = hash;
+    set->comp = comp;
+    set->del = del;
+}
+
+void shset_deinit(shset_ptr set) {
+    if (!set) return;
+    if (!set->del) return;  //削除する必要がない
+    const hnode_ptr begin = set->nodes, end = set->nodes + set->full;
+    hnode_ptr it;
+    for (it = begin; it != end; it++) {
+        if (it->object) {
+            set->del(it->object);
+        }
+    }
 }

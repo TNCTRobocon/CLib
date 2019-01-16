@@ -6,7 +6,8 @@
 #include <stdint.h>
 typedef int (*comparator_t)(const void*, const void*);
 typedef size_t (*hash_t)(const void*);
-typedef void (*deleter_t)(void**);
+typedef void (*deleter_t)(void**);//動的破壊
+typedef void (*deinit_t)(void*);//静的破壊
 typedef void (*process_t)(void*);
 typedef void (*process_pair_t)(void*, void*);
 typedef void (*process_byte_t)(char);
@@ -96,60 +97,69 @@ vmap_ptr vmap_new(size_t size,
                   deleter_t value_del);
 void vmap_delete(vmap_ptr*);
 size_t vmap_used(const vmap_ptr);
-void vmap_reserve(vmap_ptr,size_t);
-int vmap_find_idx(const vmap_ptr,void* key);
-void* vmap_get(const vmap_ptr,void* key);
-bool vmap_exist(const vmap_ptr,void* key);
-void vmap_insert(vmap_ptr,void* key,void*value);
-void vmap_set(const vmap_ptr,void* key,void* value);//要素が存在すれば上書きするよ
-void vmap_remove(vmap_ptr,  void* key);
-void vmap_for(vmap_ptr,process_pair_t);
-void vmap_for_value(vmap_ptr,process_t);
-void vmap_for_key(vmap_ptr,process_t);
+void vmap_reserve(vmap_ptr, size_t);
+int vmap_find_idx(const vmap_ptr, void* key);
+void* vmap_get(const vmap_ptr, void* key);
+bool vmap_exist(const vmap_ptr, void* key);
+void vmap_insert(vmap_ptr, void* key, void* value);
+void vmap_set(const vmap_ptr,
+              void* key,
+              void* value);  //要素が存在すれば上書きするよ
+void vmap_remove(vmap_ptr, void* key);
+void vmap_for(vmap_ptr, process_pair_t);
+void vmap_for_value(vmap_ptr, process_t);
+void vmap_for_key(vmap_ptr, process_t);
 
 //静的割り当て式循環FIFO(byte専用) static byte ring
-struct sbring{
-    uint8_t *bytes;
-    size_t full,used;
-    size_t head,tail;
+struct sbring {
+    uint8_t* bytes;
+    size_t full, used;
+    size_t head, tail;
 };
 typedef struct sbring sbring_t;
 typedef struct sbring* sbring_ptr;
 
-void sbring_init(sbring_ptr,uint8_t* bytes,size_t);//静的割り当て用
-static inline void sbring_deinit(sbring_ptr){}
+void sbring_init(sbring_ptr, uint8_t* bytes, size_t);  //静的割り当て用
+void sbring_deinit(sbring_ptr) ;
 size_t sbring_used(const sbring_ptr);
 size_t sbring_free(const sbring_ptr);
 size_t sbring_full(const sbring_ptr);
 bool sbring_is_full(const sbring_ptr);
 bool sbring_is_empty(const sbring_ptr);
-size_t sbring_write(sbring_ptr,const uint8_t* bytes, size_t size);
-size_t sbring_read(sbring_ptr,uint8_t* bytes,size_t size);
+size_t sbring_write(sbring_ptr, const uint8_t* bytes, size_t size);
+size_t sbring_read(sbring_ptr, uint8_t* bytes, size_t size);
 void sbring_clear(sbring_ptr);
-void sbring_for(sbring_ptr,process_byte_t);
-uint8_t sbring_index(sbring_ptr,size_t idx);//あまり早くないです
+void sbring_for(sbring_ptr, process_byte_t);
+uint8_t sbring_index(sbring_ptr, size_t idx);  //あまり早くないです
 
-//hash set
-struct hnode{
-    void *key;
+// static hash set
+struct hnode {
+    void* object;
     size_t hash;
 };
 typedef struct hnode hnode_t;
 typedef struct hnode* hnode_ptr;
 
-struct hset{
+struct shset {
     hnode_ptr nodes;
-    size_t reserved,used;
+    size_t reserved, used;
     hash_t hash;
     comparator_t comp;
-    deleter_t del;
+    deinit_t del;
 };
-typedef struct hset hset_t;
-typedef struct hset* hset_ptr;
+typedef struct shset shset_t;
+typedef struct shset* shset_ptr;
 
-hset_ptr hset_new(size_t reserve, hash_t hash, comparator_t comp,deleter_t del);
-static inline hset_ptr hset_new_default(size_t reserve,hash_t hash,comparator_t comp){
-    return hset_new(reserve,hash,comp,NULL);
-}
+void shset_init(shset_ptr set,
+                hnode_ptr nodes,
+                size_t reserved,
+                hash_t hash,
+                comparator_t comp,
+                deinit_t del);
+void shset_deinit(shset_ptr set);
+
+bool shset_insert(shset_ptr set,void* hashable);
+bool shset_remove(shset_ptr set,void* hashable);
+bool shset_exist(shset_ptr set,const void*hashable);
 
 #endif
