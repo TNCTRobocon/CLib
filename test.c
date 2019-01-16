@@ -51,17 +51,15 @@ int main(int argc, char** argv) {
     vmap_delete(&map);
     */
 
-    bring_ptr ring = bring_new(4);
+    sbring_t ring;
+    uint8_t bytes[4];
+    sbring_init(&ring, bytes, 4);
     uint8_t buf[8] = {0};
-    printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
-           ring->head, ring->tail);
-    printf("%ld\n", bring_write(ring, (uint8_t*)"abcde", 5));
-    printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
-           ring->head, ring->tail);
-    bring_for(ring, (void (*)(uint8_t))putchar);
 
-    printf("%ld\n", bring_read(ring, buf, 5));
+    sbring_for(&ring, (void (*)(uint8_t))putchar);
+
+    printf("%ld\n", sbring_read(&ring, buf, 5));
     printf("%s\n", buf);
-    bring_delete(&ring);
+
     return 0;
 }

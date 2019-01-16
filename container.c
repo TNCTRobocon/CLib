@@ -454,17 +454,17 @@ void vmap_for_key(vmap_ptr map, process_t process) {
     }
 }
 
-static inline size_t bring_next(bring_ptr obj, size_t now) {
+static inline size_t sbring_next(sbring_ptr obj, size_t now) {
     if (!obj) return 0;
     size_t next = now + 1;
     return next != obj->full ? next : 0;
 }
 
-bring_ptr bring_new(size_t size) {
+sbring_ptr sbring_new(size_t size) {
     size = ceil2(size);
     uint8_t* bytes = (uint8_t*)malloc(size * sizeof(uint8_t));
     if (!bytes) return NULL;
-    bring_ptr ring = (bring_ptr)malloc(sizeof(bring_t));
+    sbring_ptr ring = (sbring_ptr)malloc(sizeof(sbring_t));
     if (!ring) {
         free(bytes);
         return NULL;
@@ -477,7 +477,7 @@ bring_ptr bring_new(size_t size) {
     return ring;
 }
 
-void bring_init(bring_ptr ring, uint8_t* bytes, size_t size) {
+void sbring_init(sbring_ptr ring, uint8_t* bytes, size_t size) {
     ring->bytes = bytes;
     ring->full = size;
     ring->used = 0;
@@ -485,96 +485,82 @@ void bring_init(bring_ptr ring, uint8_t* bytes, size_t size) {
     ring->tail = 0;
 }
 
-void bring_delete(bring_ptr* ring) {
-    if (!ring || !*ring) return;
-    if ((*ring)->bytes) {
-        free((*ring)->bytes);
-        (*ring)->bytes = NULL;
-    }
-    free(*ring);
-    *ring = NULL;
-}
 
-size_t bring_used(const bring_ptr ptr) {
+size_t sbring_used(const sbring_ptr ptr) {
     return ptr ? ptr->used : 0;
 }
 
-size_t bring_free(const bring_ptr ptr) {
+size_t sbring_free(const sbring_ptr ptr) {
     return ptr ? (ptr->full) - (ptr->used) : 0;
 }
 
-size_t bring_full(const bring_ptr ptr) {
+size_t sbring_full(const sbring_ptr ptr) {
     return ptr ? ptr->full : 0;
 }
 
-bool bring_is_full(const bring_ptr ptr) {
+bool sbring_is_full(const sbring_ptr ptr) {
     return ptr ? (ptr->full - 1 == ptr->used) : false;
 }
 
-bool bring_is_empty(const bring_ptr ptr) {
+bool sbring_is_empty(const sbring_ptr ptr) {
     return ptr ? !ptr->used : false;
 }
 
-size_t bring_write(bring_ptr obj, const uint8_t* bytes, size_t size) {
+size_t sbring_write(sbring_ptr obj, const uint8_t* bytes, size_t size) {
     if (!obj || !bytes || !size) return 0;
-    size_t write = min(bring_free(obj), size);  //書き込み可能領域を計算する
+    size_t write = min(sbring_free(obj), size);  //書き込み可能領域を計算する
     size_t cnt, pos;
     pos = obj->head;
     for (cnt = 0; cnt < write; cnt++) {
         obj->bytes[pos] = *(bytes++);
-        pos = bring_next(obj, pos);
+        pos = sbring_next(obj, pos);
     }
     obj->head = pos;
     obj->used += write;
     return write;
 }
 
-size_t bring_read(bring_ptr obj, uint8_t* bytes, size_t size) {
+size_t sbring_read(sbring_ptr obj, uint8_t* bytes, size_t size) {
     if (!obj || !bytes || !size) return 0;
-    size_t read = min(bring_used(obj), size);  //読み込み可能領域を計算する
+    size_t read = min(sbring_used(obj), size);  //読み込み可能領域を計算する
     size_t cnt, pos;
     pos = obj->tail;
     for (cnt = 0; cnt < read; cnt++) {
         *(bytes++) = obj->bytes[pos];
-        pos = bring_next(obj, pos);
+        pos = sbring_next(obj, pos);
     }
     obj->tail = pos;
     obj->used -= read - 1;
     return read;
 }
 
-void bring_clear(bring_ptr ring) {
+void sbring_clear(sbring_ptr ring) {
     if (!ring) return;
     ring->used = 0;
     ring->head = 0;
     ring->tail = 0;
 }
 
-void bring_for(bring_ptr ring, process_byte_t process) {
+void sbring_for(sbring_ptr ring, process_byte_t process) {
     if (!ring || !process) return;
     size_t pos, cnt;
     for (pos = ring->head, cnt = ring->used; cnt > 0;
-         pos = bring_next(ring, pos), cnt--) {
+         pos = sbring_next(ring, pos), cnt--) {
         process(ring->bytes[pos]);
     }
 }
 
-void bring_reserve(bring_ptr ring, size_t size) {
-    if (!ring || (ring->full) >= size) return;
-    //移動
-    size = ceil2(size);
-    uint8_t* nuevo = (uint8_t*)malloc(size * sizeof(char));
-    size_t index, pos;
+uint8_t ssbring_index(sbring_ptr ring, size_t idx) {
+    if (!ring) return 0;
+    size_t pos = (ring->head + idx) % ring->full;
+    return &ring->bytes[pos];
+}
 
-    for (index = 0, pos = 0; index < (ring->used);
-         index++, pos = bring_next(ring, pos)) {
-        nuevo[index] = ring->bytes[pos];
-    }
-    free(ring->bytes);
-    //再設定
-    ring->bytes = nuevo;
-    ring->full = size;
-    ring->used = index;
-    ring->head = 0;
-    ring->tail = index;
+hset_ptr hset_new(size_t reserve,
+                  hash_t hash,
+                  comparator_t comp,
+                  deleter_t del) {
+    if (!hash && !comp) return NULL;
+    hnode_ptr nodes = (hnode_ptr)malloc(reserve * sizeof(hnode_t));
+    if (!nodes) return NULL;
 }

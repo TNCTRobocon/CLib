@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 typedef int (*comparator_t)(const void*, const void*);
-typedef int (*hasher_t)(const void*);
+typedef size_t (*hash_t)(const void*);
 typedef void (*deleter_t)(void**);
 typedef void (*process_t)(void*);
 typedef void (*process_pair_t)(void*, void*);
@@ -107,32 +107,49 @@ void vmap_for(vmap_ptr,process_pair_t);
 void vmap_for_value(vmap_ptr,process_t);
 void vmap_for_key(vmap_ptr,process_t);
 
-//循環FIFO(byte専用)
-struct bring{
+//静的割り当て式循環FIFO(byte専用) static byte ring
+struct sbring{
     uint8_t *bytes;
     size_t full,used;
     size_t head,tail;
 };
-typedef struct bring bring_t;
-typedef struct bring* bring_ptr;
+typedef struct sbring sbring_t;
+typedef struct sbring* sbring_ptr;
 
-bring_ptr bring_new(size_t);//動的割り当てよう
-void bring_init(bring_ptr,uint8_t* bytes,size_t);//静的割り当て用
-void bring_delete(bring_ptr*);//動的開放用
-size_t bring_used(const bring_ptr);
-size_t bring_free(const bring_ptr);
-size_t bring_full(const bring_ptr);
-bool bring_is_full(const bring_ptr);
-bool bring_is_empty(const bring_ptr);
+void sbring_init(sbring_ptr,uint8_t* bytes,size_t);//静的割り当て用
+static inline void sbring_deinit(sbring_ptr){}
+size_t sbring_used(const sbring_ptr);
+size_t sbring_free(const sbring_ptr);
+size_t sbring_full(const sbring_ptr);
+bool sbring_is_full(const sbring_ptr);
+bool sbring_is_empty(const sbring_ptr);
+size_t sbring_write(sbring_ptr,const uint8_t* bytes, size_t size);
+size_t sbring_read(sbring_ptr,uint8_t* bytes,size_t size);
+void sbring_clear(sbring_ptr);
+void sbring_for(sbring_ptr,process_byte_t);
+uint8_t sbring_index(sbring_ptr,size_t idx);//あまり早くないです
 
-size_t bring_write(bring_ptr,const uint8_t* bytes, size_t size);
-size_t bring_read(bring_ptr,uint8_t* bytes,size_t size);
-void bring_clear(bring_ptr);
-void bring_for(bring_ptr,process_byte_t);
-void bring_reserve(bring_ptr,size_t);//制約 動的割当の場合のみ、利用可能
+//hash set
+struct hnode{
+    void *key;
+    size_t hash;
+};
+typedef struct hnode hnode_t;
+typedef struct hnode* hnode_ptr;
 
+struct hset{
+    hnode_ptr nodes;
+    size_t reserved,used;
+    hash_t hash;
+    comparator_t comp;
+    deleter_t del;
+};
+typedef struct hset hset_t;
+typedef struct hset* hset_ptr;
 
-
-
+hset_ptr hset_new(size_t reserve, hash_t hash, comparator_t comp,deleter_t del);
+static inline hset_ptr hset_new_default(size_t reserve,hash_t hash,comparator_t comp){
+    return hset_new(reserve,hash,comp,NULL);
+}
 
 #endif
