@@ -525,7 +525,7 @@ size_t bling_write(bling_ptr obj, const uint8_t* bytes, size_t size) {
         pos = bling_next(obj, pos);
     }
     obj->head = pos;
-    obj->used += write - 1;
+    obj->used += write;
     return write;
 }
 

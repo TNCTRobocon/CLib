@@ -39,8 +39,8 @@ int main(int argc, char** argv) {
     printf("%d\n", vset_exist(set, "a"));
     vset_for(set, (process_t)puts);
     */
+    /*
     vmap_ptr map = vmap_new(16, (comparator_t)strcmp, NULL, NULL);
-
     printf("%ld\n", vmap_used(map));
     static char *aa = "a", *bb = "b", *cc = "c";
     vmap_insert(map, aa, "1");
@@ -48,7 +48,20 @@ int main(int argc, char** argv) {
     vmap_insert(map, cc, "3");
     printf("%ld\n", vmap_used(map));
     vmap_for(map, (process_pair_t)print_pair);
-
     vmap_delete(&map);
+    */
+
+    bling_ptr ring = bling_new(4);
+    uint8_t buf[8] = {0};
+    printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
+           ring->head, ring->tail);
+    printf("%ld\n", bling_write(ring, (uint8_t*)"abcde", 5));
+    printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
+           ring->head, ring->tail);
+    bling_for(ring, (void (*)(uint8_t))putchar);
+
+    printf("%ld\n", bling_read(ring, buf, 5));
+    printf("%s\n", buf);
+    bling_delete(&ring);
     return 0;
 }

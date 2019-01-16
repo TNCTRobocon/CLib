@@ -131,4 +131,8 @@ void bling_clear(bling_ptr);
 void bling_for(bling_ptr,process_byte_t);
 void bling_reserve(bling_ptr,size_t);//制約 動的割当の場合のみ、利用可能
 
+
+
+
+
 #endif
