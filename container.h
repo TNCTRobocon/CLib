@@ -108,28 +108,28 @@ void vmap_for_value(vmap_ptr,process_t);
 void vmap_for_key(vmap_ptr,process_t);
 
 //循環FIFO(byte専用)
-struct bling{
+struct bring{
     uint8_t *bytes;
     size_t full,used;
     size_t head,tail;
 };
-typedef struct bling bling_t;
-typedef struct bling* bling_ptr;
+typedef struct bring bring_t;
+typedef struct bring* bring_ptr;
 
-bling_ptr bling_new(size_t);//動的割り当てよう
-void bling_init(bling_ptr,uint8_t* bytes,size_t);//静的割り当て用
-void bling_delete(bling_ptr*);//動的開放用
-size_t bling_used(const bling_ptr);
-size_t bling_free(const bling_ptr);
-size_t bling_full(const bling_ptr);
-bool bling_is_full(const bling_ptr);
-bool bling_is_empty(const bling_ptr);
+bring_ptr bring_new(size_t);//動的割り当てよう
+void bring_init(bring_ptr,uint8_t* bytes,size_t);//静的割り当て用
+void bring_delete(bring_ptr*);//動的開放用
+size_t bring_used(const bring_ptr);
+size_t bring_free(const bring_ptr);
+size_t bring_full(const bring_ptr);
+bool bring_is_full(const bring_ptr);
+bool bring_is_empty(const bring_ptr);
 
-size_t bling_write(bling_ptr,const uint8_t* bytes, size_t size);
-size_t bling_read(bling_ptr,uint8_t* bytes,size_t size);
-void bling_clear(bling_ptr);
-void bling_for(bling_ptr,process_byte_t);
-void bling_reserve(bling_ptr,size_t);//制約 動的割当の場合のみ、利用可能
+size_t bring_write(bring_ptr,const uint8_t* bytes, size_t size);
+size_t bring_read(bring_ptr,uint8_t* bytes,size_t size);
+void bring_clear(bring_ptr);
+void bring_for(bring_ptr,process_byte_t);
+void bring_reserve(bring_ptr,size_t);//制約 動的割当の場合のみ、利用可能
 
 
 

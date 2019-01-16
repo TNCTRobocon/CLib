@@ -51,17 +51,17 @@ int main(int argc, char** argv) {
     vmap_delete(&map);
     */
 
-    bling_ptr ring = bling_new(4);
+    bring_ptr ring = bring_new(4);
     uint8_t buf[8] = {0};
     printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
            ring->head, ring->tail);
-    printf("%ld\n", bling_write(ring, (uint8_t*)"abcde", 5));
+    printf("%ld\n", bring_write(ring, (uint8_t*)"abcde", 5));
     printf("full=%ld,used=%ld,head=%ld,tail=%ld\n", ring->full, ring->used,
            ring->head, ring->tail);
-    bling_for(ring, (void (*)(uint8_t))putchar);
+    bring_for(ring, (void (*)(uint8_t))putchar);
 
-    printf("%ld\n", bling_read(ring, buf, 5));
+    printf("%ld\n", bring_read(ring, buf, 5));
     printf("%s\n", buf);
-    bling_delete(&ring);
+    bring_delete(&ring);
     return 0;
 }
