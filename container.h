@@ -189,6 +189,7 @@ void shmap_init(shmap_ptr map,
 void shmap_deinit(shmap_ptr map);
 
 void shmap_insert(shmap_ptr map, void* key,void* value);
-void shmap_set(shmap_ptr map, void* key,void* value);
+void shmap_set(shmap_ptr map, void* key,void* value);//上書き
 void* shmap_get(shmap_ptr map, void* key);
+void shmap_for(shmap_ptr map,process_pair_t);
 #endif

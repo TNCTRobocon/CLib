@@ -635,12 +635,13 @@ void shmap_init(shmap_ptr map,
                 comparator_t comp,
                 deinit_t key_del,
                 deinit_t val_del) {
-    if (!map && !pairs && !hash && !comp) return;
+    if (!map && !pairs && !hash && !comp && !reserve) return;
     memset(pairs, 0, reserve * sizeof(hpair_t));
     map->pairs = pairs;
-    map->reserved = 0;
+    map->reserved = reserve;
     map->used = 0;
     map->hash = hash;
+    map->comp = comp;
     map->key_del = key_del;
     map->val_del = val_del;
 }
@@ -728,14 +729,21 @@ void* shmap_get(shmap_ptr map, void* key) {
     for (pos = hash % reserved, cnt = 0; cnt < reserved;
          cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
         it = &map->pairs[pos];
-        if (it->key && it->hash == hash) {
-            //同じ要素でないことを確認する
-            if (!map->comp(it->key, key)) {
-                return NULL;  //すでに同一要素が存在するので終了
-            }
-        } else if (!it->key && map->comp(it->key, key)) {
+        if (it->hash == hash && !(map->comp(it->key, key))) {
             return it->value;
+        } else if (!it->key) {
+            return NULL;
         }
     }
     return NULL;
+}
+
+void shmap_for(shmap_ptr map, process_pair_t process) {
+    if (!map && !process) return;
+    hpair_ptr begin = map->pairs, end = map->pairs + map->reserved, it;
+    for (it = begin; it != end; it++) {
+        if (it->key) {
+            process(it->key, it->value);
+        }
+    }
 }

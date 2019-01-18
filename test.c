@@ -12,6 +12,25 @@ void print_pair(char* a, char* b) {
     printf("%s->%s\n", a, b);
 }
 
+size_t strhash(const char* str) {
+    size_t h = 0;
+    for (; *str != '\0'; str++) {
+        h = h << 1 ^ *str;
+    }
+    return h;
+}
+
+size_t memhash(const void* mem, size_t size) {
+    size_t h = 0;
+    const char* const begin = mem;
+    const char* const end = begin + size;
+    const char* it;
+    for (it = begin; it != end; it++) {
+        h = h << 1 ^ *it;
+    }
+    return h;
+}
+
 int main(int argc, char** argv) {
     /*// allocation test
     printf("0:%ld\n", ceil2(0));
@@ -50,16 +69,24 @@ int main(int argc, char** argv) {
     vmap_for(map, (process_pair_t)print_pair);
     vmap_delete(&map);
     */
+    /*
+        sbring_t ring;
+        uint8_t bytes[4];
+        sbring_init(&ring, bytereturn;  //すでに同一要素が存在するので終了s, 4);
+        uint8_t buf[8] = {0};return;  //すでに同一要素が存在するので終了
 
-    sbring_t ring;
-    uint8_t bytes[4];
-    sbring_init(&ring, bytes, 4);
-    uint8_t buf[8] = {0};
+        sbring_for(&ring, (void (*)(uint8_t))putchar);
 
-    sbring_for(&ring, (void (*)(uint8_t))putchar);
-
-    printf("%ld\n", sbring_read(&ring, buf, 5));
-    printf("%s\n", buf);
-
+        printf("%ld\n", sbring_read(&ring, buf, 5));
+        printf("%s\n", buf);
+    */
+    hpair_t pairs[16];
+    shmap_t map;
+    shmap_init(&map, pairs, 16, (hash_t)strhash, (comparator_t)strcmp, NULL,
+               NULL);
+    shmap_insert(&map, "a", "0");
+    shmap_insert(&map, "b", "1");
+    shmap_for(&map, (process_pair_t)print_pair);
+    puts((char*)shmap_get(&map, "c"));
     return 0;
 }
