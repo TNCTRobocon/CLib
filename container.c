@@ -564,6 +564,7 @@ void shset_init(shset_ptr set,
                 comparator_t comp,
                 deinit_t del) {
     if (!set || !nodes) return;
+    memset(nodes, 0, reserved * sizeof(hnode_t));
     set->nodes = nodes;
     set->reserved = reserved;
     set->used = 0;
@@ -586,6 +587,7 @@ void shset_deinit(shset_ptr set) {
 
 void shset_insert(shset_ptr set, void* hashable) {
     if (!set) return;
+    if (set->used >= set->reserved - 1) return;  //容量を使い切った
     size_t hash = set->hash(hashable);
     size_t reserved = set->reserved;
     size_t pos, cnt;
@@ -602,6 +604,7 @@ void shset_insert(shset_ptr set, void* hashable) {
             //空きを発見した
             it->object = hashable;
             it->hash = hash;
+            set->used++;
             return;
         }
     }
@@ -623,4 +626,116 @@ bool shset_exist(shset_ptr set, const void* hashable) {
         }
     }
     return false;
+}
+
+void shmap_init(shmap_ptr map,
+                hpair_ptr pairs,
+                size_t reserve,
+                hash_t hash,
+                comparator_t comp,
+                deinit_t key_del,
+                deinit_t val_del) {
+    if (!map && !pairs && !hash && !comp) return;
+    memset(pairs, 0, reserve * sizeof(hpair_t));
+    map->pairs = pairs;
+    map->reserved = 0;
+    map->used = 0;
+    map->hash = hash;
+    map->key_del = key_del;
+    map->val_del = val_del;
+}
+
+void shmap_deinit(shmap_ptr map) {
+    if (!map) return;
+    if (!map->key_del && !map->val_del) return;  //削除する必要がない
+    const hpair_ptr begin = map->pairs, end = map->pairs + map->reserved;
+    hpair_ptr it;
+    for (it = begin; it != end; it++) {
+        if (it->key) {
+            map->key_del(it->key);
+            it->key = NULL;
+        }
+        if (it->value) {
+            map->val_del(it->value);
+            it->value = NULL;
+        }
+    }
+}
+
+void shmap_insert(shmap_ptr map, void* key, void* value) {
+    if (!map) return;
+    if (map->used >= map->reserved - 1) return;
+    size_t hash = map->hash(key);
+    size_t reserved = map->reserved;
+    size_t pos, cnt;
+    hpair_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &map->pairs[pos];
+        if (it->key && it->hash == hash) {
+            //同じ要素でないことを確認する
+            if (!map->comp(it->key, key)) {
+                return;  //すでに同一要素が存在するので終了
+            }
+        } else if (!it->key) {
+            //空きを発見した
+            it->key = key;
+            it->value = value;
+            it->hash = hash;
+            map->used++;
+            return;
+        }
+    }
+}
+
+void shmap_set(shmap_ptr map, void* key, void* value) {
+    if (!map) return;
+    if (map->used >= map->reserved - 1) return;
+    size_t hash = map->hash(key);
+    size_t reserved = map->reserved;
+    size_t pos, cnt;
+    hpair_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &map->pairs[pos];
+        if (it->key && it->hash == hash) {
+            //同じ要素でないことを確認する
+            if (!map->comp(it->key, key)) {
+                //空きを発見した
+                it->key = key;
+                it->value = value;
+                it->hash = hash;
+                map->used++;
+                return;
+            }
+        } else if (!it->key) {
+            //空きを発見した
+            it->key = key;
+            it->value = value;
+            it->hash = hash;
+            map->used++;
+            return;
+        }
+    }
+}
+
+void* shmap_get(shmap_ptr map, void* key) {
+    if (!map) return NULL;
+    size_t hash = map->hash(key);
+    size_t reserved = map->reserved;
+    size_t pos, cnt;
+    hpair_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &map->pairs[pos];
+        if (it->key && it->hash == hash) {
+            //同じ要素でないことを確認する
+            if (!map->comp(it->key, key)) {
+                return NULL;  //すでに同一要素が存在するので終了
+            }
+        } else if (!it->key && map->comp(it->key, key)) {
+            return it->value;
+        }
+    }
+    return NULL;
 }

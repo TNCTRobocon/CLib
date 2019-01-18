@@ -6,8 +6,8 @@
 #include <stdint.h>
 typedef int (*comparator_t)(const void*, const void*);
 typedef size_t (*hash_t)(const void*);
-typedef void (*deleter_t)(void**);//動的破壊
-typedef void (*deinit_t)(void*);//静的破壊
+typedef void (*deleter_t)(void**);  //動的破壊
+typedef void (*deinit_t)(void*);    //静的破壊
 typedef void (*process_t)(void*);
 typedef void (*process_pair_t)(void*, void*);
 typedef void (*process_byte_t)(char);
@@ -120,7 +120,7 @@ typedef struct sbring sbring_t;
 typedef struct sbring* sbring_ptr;
 
 void sbring_init(sbring_ptr, uint8_t* bytes, size_t);  //静的割り当て用
-void sbring_deinit(sbring_ptr) ;
+void sbring_deinit(sbring_ptr);
 size_t sbring_used(const sbring_ptr);
 size_t sbring_free(const sbring_ptr);
 size_t sbring_full(const sbring_ptr);
@@ -158,8 +158,37 @@ void shset_init(shset_ptr set,
                 deinit_t del);
 void shset_deinit(shset_ptr set);
 
-void shset_insert(shset_ptr set,void* hashable);
-bool shset_remove(shset_ptr set,void* hashable);
-bool shset_exist(shset_ptr set,const void*hashable);
+void shset_insert(shset_ptr set, void* hashable);
+bool shset_exist(shset_ptr set, const void* hashable);
 
+struct hpair {
+    void *key, *value;
+    size_t hash;
+};
+typedef struct hpair hpair_t;
+typedef struct hpair* hpair_ptr;
+
+struct shmap {
+    hpair_ptr pairs;
+    size_t reserved, used;
+    hash_t hash;
+    comparator_t comp;
+    deinit_t key_del;
+    deinit_t val_del;
+};
+typedef struct shmap shmap_t;
+typedef struct shmap* shmap_ptr;
+
+void shmap_init(shmap_ptr map,
+                hpair_ptr pairs,
+                size_t reserve,
+                hash_t hash,
+                comparator_t comp,
+                deinit_t key_del,
+                deinit_t val_del);
+void shmap_deinit(shmap_ptr map);
+
+void shmap_insert(shmap_ptr map, void* key,void* value);
+void shmap_set(shmap_ptr map, void* key,void* value);
+void* shmap_get(shmap_ptr map, void* key);
 #endif
