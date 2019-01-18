@@ -738,7 +738,7 @@ void* shmap_get(shmap_ptr map, void* key) {
     return NULL;
 }
 
-bool shmap_exist(shmap_ptr map, void* key){
+bool shmap_exist(shmap_ptr map, void* key) {
     if (!map) return false;
     size_t hash = map->hash(key);
     size_t reserved = map->reserved;
