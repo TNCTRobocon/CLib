@@ -738,6 +738,24 @@ void* shmap_get(shmap_ptr map, void* key) {
     return NULL;
 }
 
+bool shmap_exist(shmap_ptr map, void* key){
+    if (!map) return false;
+    size_t hash = map->hash(key);
+    size_t reserved = map->reserved;
+    size_t pos, cnt;
+    hpair_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &map->pairs[pos];
+        if (it->hash == hash && !(map->comp(it->key, key))) {
+            return true;
+        } else if (!it->key) {
+            return false;
+        }
+    }
+    return false;
+}
+
 void shmap_for(shmap_ptr map, process_pair_t process) {
     if (!map && !process) return;
     hpair_ptr begin = map->pairs, end = map->pairs + map->reserved, it;
