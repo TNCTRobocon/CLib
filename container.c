@@ -554,7 +554,7 @@ void sbring_for(sbring_ptr ring, process_byte_t process) {
 uint8_t ssbring_index(sbring_ptr ring, size_t idx) {
     if (!ring) return 0;
     size_t pos = (ring->head + idx) % ring->full;
-    return &ring->bytes[pos];
+    return ring->bytes[pos];
 }
 
 void shset_init(shset_ptr set,
@@ -565,7 +565,7 @@ void shset_init(shset_ptr set,
                 deinit_t del) {
     if (!set || !nodes) return;
     set->nodes = nodes;
-    set->reserve = reserved;
+    set->reserved = reserved;
     set->used = 0;
     set->hash = hash;
     set->comp = comp;
@@ -575,11 +575,52 @@ void shset_init(shset_ptr set,
 void shset_deinit(shset_ptr set) {
     if (!set) return;
     if (!set->del) return;  //削除する必要がない
-    const hnode_ptr begin = set->nodes, end = set->nodes + set->full;
+    const hnode_ptr begin = set->nodes, end = set->nodes + set->reserved;
     hnode_ptr it;
     for (it = begin; it != end; it++) {
         if (it->object) {
             set->del(it->object);
         }
     }
+}
+
+void shset_insert(shset_ptr set, void* hashable) {
+    if (!set) return;
+    size_t hash = set->hash(hashable);
+    size_t reserved = set->reserved;
+    size_t pos, cnt;
+    hnode_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &set->nodes[pos];
+        if (it->object && it->hash == hash) {
+            //同じ要素でないことを確認する
+            if (!set->comp(it->object, hashable)) {
+                return;  //すでに同一要素が存在するので終了
+            }
+        } else if (!it->object) {
+            //空きを発見した
+            it->object = hashable;
+            it->hash = hash;
+            return;
+        }
+    }
+    return;
+}
+bool shset_exist(shset_ptr set, const void* hashable) {
+    if (!set) return false;
+    size_t hash = set->hash(hashable);
+    size_t reserved = set->reserved;
+    size_t pos, cnt;
+    hnode_ptr it;
+    for (pos = hash % reserved, cnt = 0; cnt < reserved;
+         cnt++, pos = pos < reserved - 1 ? pos + 1 : 0) {
+        it = &set->nodes[pos];
+        if (!it->object) {
+            return false;
+        } else if (it->hash == hash && !set->comp(it->object, hashable)) {
+            return true;
+        }
+    }
+    return false;
 }

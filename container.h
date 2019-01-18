@@ -158,7 +158,7 @@ void shset_init(shset_ptr set,
                 deinit_t del);
 void shset_deinit(shset_ptr set);
 
-bool shset_insert(shset_ptr set,void* hashable);
+void shset_insert(shset_ptr set,void* hashable);
 bool shset_remove(shset_ptr set,void* hashable);
 bool shset_exist(shset_ptr set,const void*hashable);
 
