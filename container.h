@@ -1,19 +1,7 @@
 #pragma once
 #ifndef __CMAP_HAEDER_GUARD__
 #define __CMAP_HAEDER_GUARD__
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-typedef int (*comparator_t)(const void*, const void*);
-typedef size_t (*hash_t)(const void*);
-typedef void (*deleter_t)(void**);  //動的破壊
-typedef void (*deinit_t)(void*);    //静的破壊
-typedef void (*process_t)(void*);
-typedef void (*process_pair_t)(void*, void*);
-typedef void (*process_byte_t)(char);
-typedef void** (*iterator_generator_t)(void*);
-typedef void** (*iterator_stepper_t)(void**);
-
+#include "types.h"
 //抽象範囲型
 struct vrange {
     void* object;
