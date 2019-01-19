@@ -1,4 +1,6 @@
 #include "mathbox.h"
+#include <stdio.h>
+#include "mathfunc.h"
 
 static inline int32_t clip32(int64_t x) {
     if (x > INT32_MAX) return INT32_MAX;
@@ -15,27 +17,6 @@ static inline size_t min3(size_t a, size_t b, size_t c) {
 
 static inline int32_t abs32(int32_t a) {
     return a > 0 ? a : -a;
-}
-
-q1516_t sqrt1516(q1516_t x) {
-    // newtown方による解法
-    const q1516_t eps = 1 << 2;
-    const size_t limit = 8;  //試行回数の制限
-    size_t cnt;
-    q1516_t now = 1 << 16, next = 0;
-    q3132_t f;
-    q1516_t g;
-    for (cnt = 0; cnt < limit; cnt++) {
-        f = (((q3132_t)now * now) >> 16) - x;
-        g = 2 * now;
-        next = now - ((f << 16) / g);
-        if (abs32(now - next) < eps) {
-            return next;
-        } else {
-            now = next;
-        }
-    }
-    return next;
 }
 
 void svec_init(svec_ptr vec, q1516_t* array, size_t size) {

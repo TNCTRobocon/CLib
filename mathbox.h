@@ -2,7 +2,8 @@
 #define __MATHBOX_HEADER_GUARD__
 
 #include "types.h"
-q1516_t sqrt1516(q1516_t);
+
+
 
 struct svec{
     size_t size;
