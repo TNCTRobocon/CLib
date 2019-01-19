@@ -4,7 +4,7 @@ TARGET := cmap.out
 CFLAGS := -std=c99 -g -Wall -O0
 FORMAT := clang-format
 SRC:= test.c container.c network.c controllor.c
-OBJ:= test.o container.o network.o controllor.h
+OBJ:= test.o container.o network.o controllor.o
 
 .PHONY:all run debug clear format
 all:$(TARGET)

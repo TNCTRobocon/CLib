@@ -2,6 +2,7 @@
 #include <string.h>
 #include "allocation.h"
 #include "container.h"
+#include "controllor.h"
 
 /*
 void shows(void** id) {
@@ -80,13 +81,19 @@ int main(int argc, char** argv) {
         printf("%ld\n", sbring_read(&ring, buf, 5));
         printf("%s\n", buf);
     */
-    hpair_t pairs[16];
-    shmap_t map;
-    shmap_init(&map, pairs, 16, (hash_t)strhash, (comparator_t)strcmp, NULL,
-               NULL);
-    shmap_insert(&map, "a", "0");
-    shmap_insert(&map, "b", "1");
-    shmap_for(&map, (process_pair_t)print_pair);
-    puts((char*)shmap_get(&map, "c"));
+    /*
+     hpair_t pairs[16];
+     shmap_t map;
+     shmap_init(&map, pairs, 16, (hash_t)strhash, (comparator_t)strcmp, NULL,
+                NULL);
+     shmap_insert(&map, "a", "0");
+     shmap_insert(&map, "b", "1");
+     shmap_for(&map, (process_pair_t)print_pair);
+     puts((char*)shmap_get(&map, "c"));
+     return 0;
+     */
+    q1516_t x = 10 << 16;
+    q1516_t y = sqrt1516(x);
+    printf("%d:%08x\n", y >> 16, y);
     return 0;
 }

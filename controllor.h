@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __CONTROLLOR_HEADER_GUARD__
 #define __CONTROLLOR_HEADER_GUARD__
 #include <stdint.h>
@@ -6,6 +5,9 @@
 
 typedef int32_t q1516_t;
 typedef int64_t q3132_t;
+
+q1516_t sqrt1516(q1516_t);
+
 struct spid{
     q1516_t p,i,d;
     q1516_t last_result;//前回の出力結果
@@ -30,5 +32,12 @@ typedef struct svec* svec_ptr;
 void svec_init(svec_ptr , q1516_t* array, size_t size);
 void svec_deinit(svec_ptr);
 q3132_t svec_dot(svec_ptr,svec_ptr);
+svec_ptr svec_add(svec_ptr,const svec_ptr,const svec_ptr);
+svec_ptr svec_sub(svec_ptr,const svec_ptr,const svec_ptr);
+svec_ptr svec_neg(svec_ptr,const svec_ptr);
+svec_ptr svec_set(svec_ptr,q1516_t);
+q1516_t svec_idx(const svec_ptr,size_t);
+q1516_t svec_length2(svec_ptr,const svec_ptr);//|x|^2
+svec_ptr svec_normalize(svec_ptr,const svec_ptr);
 
 #endif
