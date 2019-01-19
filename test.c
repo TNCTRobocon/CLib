@@ -3,7 +3,7 @@
 #include "allocation.h"
 #include "container.h"
 #include "controllor.h"
-
+#include "mathbox.h"
 /*
 void shows(void** id) {
     printf("%d", *id);

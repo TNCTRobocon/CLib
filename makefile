@@ -3,8 +3,8 @@ CC := gcc
 TARGET := cmap.out
 CFLAGS := -std=c99 -g -Wall -O0
 FORMAT := clang-format
-SRC:= test.c container.c network.c controllor.c
-OBJ:= test.o container.o network.o controllor.o
+SRC:= test.c container.c network.c controllor.c mathbox.c 
+OBJ:= test.o container.o network.o controllor.o mathbox.o
 
 .PHONY:all run debug clear format
 all:$(TARGET)
@@ -17,6 +17,8 @@ container.o:container.c
 network.o:network.c
 	$(CC) $(CFLAGS) -c $<
 controllor.o:controllor.c
+	$(CC) $(CFLAGS) -c $<
+mathbox.o:mathbox.c
 	$(CC) $(CFLAGS) -c $<
 run:all
 	./$(TARGET)
