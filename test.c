@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
      puts((char*)shmap_get(&map, "c"));
      return 0;
      */
-    q1516_t x = 1 << 16;
-    q1516_t y = exp1516(x);
+    q1516_t x = 9 << 16;
+    q1516_t y = sqrt1516(x);
     printf("%lf:%08x\n", (double)y / (1 << 16), y);
     return 0;
 }
